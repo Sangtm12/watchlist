@@ -1,0 +1,14 @@
+services:
+  watchlist-db:
+    image: postgres:17
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=watchlist
+    ports: 
+      - "5432:5432"
+    restart: unless-stopped
+    volumes: 
+      - watchlist_db:/var/lib/postgresql/data
+volumes: 
+  watchlist_db:
