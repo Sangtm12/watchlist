@@ -1,5 +1,6 @@
 services:
   watchlist-db:
+    container_name: watchlist-postgres
     image: postgres:17
     environment:
       - POSTGRES_USER=postgres
