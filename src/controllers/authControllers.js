@@ -1,5 +1,6 @@
 import { prisma } from "../config/db";
 import bcrypt from "bcryptjs";
+import generateToken from "../utils/generateToken";
 //use argon2 for memory-hard defense, no length limits
 
 const register = async (req, res) => {
@@ -45,18 +46,32 @@ const login = async (req, res) => {
     where: { email },
   });
 
+  //no user
   if (!user) {
     res.status(401).json({
       error: "Wrong email or password",
     });
   }
 
+  //wrong password
   const isPasswordValid = bcrypt.compare(password, user.password);
-
   if (!isPasswordValid)
     json.status(401).json({
       error: "Wrong email or password",
     });
+
+  //sign in
+  const token = generateToken(user.id, res);
+  res.status(200).json({
+    status: "success",
+    data: {
+      user: {
+        id: user.id,
+        email,
+      },
+      token,
+    },
+  });
 };
 
 export { register, login };
