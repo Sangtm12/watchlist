@@ -1,6 +1,6 @@
-import { prisma } from "../config/db";
+import { prisma } from "../config/db.js";
 import bcrypt from "bcryptjs";
-import generateToken from "../utils/generateToken";
+import generateToken from "../utils/generateToken.js";
 //use argon2 for memory-hard defense, no length limits
 
 const register = async (req, res) => {
