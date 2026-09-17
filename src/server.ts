@@ -1,30 +1,27 @@
 import express from "express";
 import { config } from "dotenv";
 import { connectDB, disconnectDB } from "./config/db.js";
-
-//import routes
 import movieRoutes from "./routes/movieRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 
 config();
-connectDB();
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// API routes
 app.use("/movies", movieRoutes);
 app.use("/auth", authRoutes);
 
-const PORT = 5001;
+const PORT = Number(process.env.PORT) || 5001;
+
 const server = app.listen(PORT, () => {
-  console.log(`running on port ${PORT} nigga`);
+  console.log(`running on port ${PORT}`);
 });
 
-// Handle unhandled promise rejections (e.g., database connection errors)
-process.on("unhandledRejection", (err) => {
+void connectDB();
+
+process.on("unhandledRejection", (err: unknown) => {
   console.error("Unhandled Rejection:", err);
   server.close(async () => {
     await disconnectDB();
@@ -32,14 +29,12 @@ process.on("unhandledRejection", (err) => {
   });
 });
 
-// Handle uncaught exceptions
-process.on("uncaughtException", async (err) => {
+process.on("uncaughtException", async (err: Error) => {
   console.error("Uncaught Exception:", err);
   await disconnectDB();
   process.exit(1);
 });
 
-// Graceful shutdown
 process.on("SIGTERM", async () => {
   console.log("SIGTERM received, shutting down gracefully");
   server.close(async () => {

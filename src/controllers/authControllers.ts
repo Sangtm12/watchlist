@@ -1,19 +1,31 @@
-import { prisma } from "../config/db.js";
+import type { Request, Response } from "express";
 import bcrypt from "bcryptjs";
+import { prisma } from "../config/db.js";
 import generateToken from "../utils/generateToken.js";
-//use argon2 for memory-hard defense, no length limits
 
-const register = async (req, res) => {
+interface RegisterBody {
+  name: string;
+  email: string;
+  password: string;
+}
+
+interface LoginBody {
+  email: string;
+  password: string;
+}
+
+const register = async (req: Request<{}, {}, RegisterBody>, res: Response): Promise<void> => {
   const { name, email, password } = req.body;
 
   const userExists = await prisma.user.findUnique({
-    where: { email: email },
+    where: { email },
   });
 
   if (userExists) {
-    return res.status(400).json({
+    res.status(400).json({
       error: "User already exists with this email",
     });
+    return;
   }
 
   const salt = await bcrypt.genSalt(10);
@@ -39,35 +51,37 @@ const register = async (req, res) => {
   });
 };
 
-const login = async (req, res) => {
-  const { name, email, password } = req.body;
+const login = async (req: Request<{}, {}, LoginBody>, res: Response): Promise<void> => {
+  const { email, password } = req.body;
 
   const user = await prisma.user.findUnique({
     where: { email },
   });
 
-  //no user
   if (!user) {
     res.status(401).json({
       error: "Wrong email or password",
     });
+    return;
   }
 
-  //wrong password
-  const isPasswordValid = bcrypt.compare(password, user.password);
-  if (!isPasswordValid)
-    json.status(401).json({
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordValid) {
+    res.status(401).json({
       error: "Wrong email or password",
     });
+    return;
+  }
 
-  //sign in
   const token = generateToken(user.id, res);
+
   res.status(200).json({
     status: "success",
     data: {
       user: {
         id: user.id,
-        email,
+        email: user.email,
       },
       token,
     },

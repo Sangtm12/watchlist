@@ -7,18 +7,19 @@ const prisma = new PrismaClient({
       : ["error"],
 });
 
-const connectDB = async () => {
+const connectDB = async (): Promise<void> => {
   try {
     await prisma.$connect();
     console.log("DB connected via prisma");
-  } catch (error) {
+  } catch (error: unknown) {
     await prisma.$disconnect();
-    console.log(`Connection error: ${error.message}`);
+    const message = error instanceof Error ? error.message : "Unknown database connection error";
+    console.log(`Connection error: ${message}`);
     process.exit(1);
   }
 };
 
-const disconnectDB = async () => {
+const disconnectDB = async (): Promise<void> => {
   await prisma.$disconnect();
 };
 
