@@ -88,4 +88,15 @@ const login = async (req: Request<{}, {}, LoginBody>, res: Response): Promise<vo
   });
 };
 
-export { register, login };
+const logout = (req: Request, res: Response): void => {
+  res.cookie("jwt", "", {
+    httpOnly: true,
+    expires: new Date(0),
+  });
+  res.status(200).json({
+    status: "success",
+    message: "User logged out successfully",
+  });
+}
+
+export { register, login, logout };
