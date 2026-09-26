@@ -14,7 +14,7 @@ const addToWatchlist = async (
   res: Response,
 ) => {
   const { movieId, status, rating, notes } = req.body;
-  const userId = "b9b04b4e-2a51-473b-a987-35bfbc9195cc";
+  const userId = req.user.id;
 
   if (!userId) {
     return res.status(401).json({
